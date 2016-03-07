@@ -52,7 +52,7 @@ public class MonitorService extends Service implements SensorEventListener {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        Log.d("CS65", "managers: " + locationManager + sensorManager);
         SetUpLocationManager();
         SetUpSensorManager();
 
@@ -70,14 +70,12 @@ public class MonitorService extends Service implements SensorEventListener {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-Log.d("CS65", "managers: "+ locationManager + sensorManager);
-
     }
 
     //Register sensors for accelerometer
     private void SetUpSensorManager() {
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_NORMAL);
 
     }
 
@@ -107,12 +105,11 @@ Log.d("CS65", "managers: "+ locationManager + sensorManager);
     public void onSensorChanged(SensorEvent event) {
         Object[] features;
         Double classed = 0.0;
-        Log.d(TAG, "Sensor Changed: " + classed);
 
         float x = event.values[0];
         float y = event.values[1];
         float z = event.values[2];
-
+        
         double m = Math.sqrt(x * x + y * y + z * z);
         sensorQueue.add(m);
 
@@ -128,7 +125,7 @@ Log.d("CS65", "managers: "+ locationManager + sensorManager);
 
             Log.d(TAG, "Sensor classified: " + classed);
             if (classed == 2) {
-                //Broadcast to Tracking Service that we adjused our activity type
+                //Broadcast to Tracking Service that we adjusted our activity type
                 Intent intent = new Intent();
                 intent.setAction(INTENTFILTER2);//random intent action
                 Bundle extras = new Bundle();

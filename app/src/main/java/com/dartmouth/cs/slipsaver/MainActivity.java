@@ -25,7 +25,12 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
+import android.widget.Toast;
 
+import org.json.JSONObject;
+
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity  implements ServiceConnection {
@@ -83,7 +88,7 @@ public class MainActivity extends AppCompatActivity  implements ServiceConnectio
             }
         };
 
-        if (fallen){
+        if (fallen) {
             Intent alertIntent = new Intent(this, AlertActivity.class);
             Bundle alertExtras = new Bundle();
             alertExtras.putByteArray("Location", bytes);
@@ -133,7 +138,7 @@ public class MainActivity extends AppCompatActivity  implements ServiceConnectio
         fragment = null;
 
         Class fragmentClass;
-        switch(menuItem.getItemId()) {
+        switch (menuItem.getItemId()) {
             case R.id.nav_enable:
                 if (menuItem.getTitle().toString().equals("Enable Monitor Mode")) {
                     fragmentClass = DisableScreenFragment.class;
@@ -141,11 +146,11 @@ public class MainActivity extends AppCompatActivity  implements ServiceConnectio
                     SpannableString s = new SpannableString("Disable Monitor Mode");
                     s.setSpan(new ForegroundColorSpan(Color.RED), 0, s.length(), 0);
                     menuItem.setTitle(s);
-                    if (mConnection != this){
-                    unbindService(mConnection);
-                    Log.d("CS65", "Unbinding");}
-                }
-                else {
+                    if (mConnection != this) {
+                        unbindService(mConnection);
+                        Log.d("CS65", "Unbinding");
+                    }
+                } else {
                     fragmentClass = EnableScreenFragment.class;
                     SpannableString s = new SpannableString("Enable Monitor Mode");
                     s.setSpan(new ForegroundColorSpan(Color.argb(250, 30, 90, 50)), 0, s.length(), 0);
@@ -206,13 +211,15 @@ public class MainActivity extends AppCompatActivity  implements ServiceConnectio
     private void doBindService() {
         bindService(new Intent(this, MonitorService.class), mConnection, Context.BIND_AUTO_CREATE);
         mIsBound = true;
-        Log.d("CS65", "Is m bound?: "+ mIsBound);
+        Log.d("CS65", "Is m bound?: " + mIsBound);
     }
+
     public void OnCancel(View view) {
         unbindService(mConnection);
         //unregisterReceiver(receiver);
         finish();
     }
+
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         MonitorService.MonitorBinder binder = (MonitorService.MonitorBinder) service;
@@ -225,4 +232,22 @@ public class MainActivity extends AppCompatActivity  implements ServiceConnectio
     public void onServiceDisconnected(ComponentName name) {
 
     }
+ /*   private void SendEmail() {
+        Intent i = new Intent(Intent.ACTION_SEND);
+
+        i.setType("message/rfc822");
+
+        //Load contacts from database in background
+          String email = "k.sprout16@gmail.com";
+            String name = "Katy";
+            i.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
+            i.putExtra(Intent.EXTRA_TEXT, name + " We are alerting you about a detected fall.");
+            i.putExtra(Intent.EXTRA_SUBJECT, "Slip Saver Alert!");
+
+            try {
+                startActivity(Intent.createChooser(i, "Send mail..."));
+            } catch (android.content.ActivityNotFoundException ex) {
+                Toast.makeText(this, "Sorry, no email clients installed..?", Toast.LENGTH_SHORT).show();
+            }
+        }*/
 }

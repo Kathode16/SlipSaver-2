@@ -5,6 +5,7 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -75,20 +76,13 @@ public class AlertActivity extends Activity {
         Loader loader = new Loader(this);
        loader.loadInBackground();
 
+        String emails = "";
         //Go through contacts to gather all the emails we need. Send email for each contact.
         for (Contact contact : contacts) {
-            String email = contact.Email;
-            String name = contact.FirstName;
-            i.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
-            i.putExtra(Intent.EXTRA_TEXT, name + "We are alerting you about a detected fall.");
-            i.putExtra(Intent.EXTRA_SUBJECT, "Slip Saver Alert!");
-
-            try {
-                startActivity(Intent.createChooser(i, "Send mail..."));
-            } catch (android.content.ActivityNotFoundException ex) {
-                Toast.makeText(AlertActivity.this, "Sorry, no email clients installed..?", Toast.LENGTH_SHORT).show();
-            }
+            emails += contact.Email;
         }
+        Sender sender = new Sender(this);
+        sender.execute(emails);
     }
 
     // Convert byte array to Location.
@@ -129,6 +123,30 @@ public class AlertActivity extends Activity {
         public Object loadInBackground() {
             contacts = db.fetchEntries();
             return contacts;
+        }
+    }
+    //Class that extends Async to load the exercise entries from the database in the background
+    public class Sender extends AsyncTask {
+        //private List<ExerciseEntry> dbEntries;
+        public Sender(Context context) {
+            super();
+        }
+
+        @Override
+        protected Object doInBackground(Object[] params) {
+            try {
+                GMailSender sender = new GMailSender("theslipsaver", "slip_saver");
+                Log.d("SendMail", sender.getPasswordAuthentication().getUserName());
+                sender.sendMail("Slip Saver Alert!",
+                        "Katy, we have received detection of a fall. ",
+                        "TheSlipSaver@gmail.com",
+                        String.valueOf(params));
+            } catch (Exception e) {
+                Log.e("SendMail", e.getMessage(), e);
+            }
+            Log.e("SendMail", "Sent Message!");
+
+            return null;
         }
     }
 }
